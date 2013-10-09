@@ -2,6 +2,7 @@ A program that implements the game called Numbrix. The game is played on a squar
 
 As of right now, this program reads in a text file that specifies the current board. The board size is specified by a number, and its contents are specified by 'row col number' (where 1,1 is the left bottom corner). An example text file with a board of size 8x8 would look like:
 
+8
 8 1 45
 8 2 44
 8 3 39
