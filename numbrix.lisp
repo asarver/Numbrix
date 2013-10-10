@@ -42,33 +42,32 @@
     (return-from insert-element-into-board (list board is_null_value)))
 
 (defun read-file (file_name)
-   * (with-open-file (stream file_name)
-        (setf dim (parse-integer (read-line stream nil)))
-        (setf elements_left (* dim dim))
-        (setf board (make-array (list dim dim)))
-        (do ((line (read-line stream nil)
-                   (read-line stream nil)))
-            
-            ((null line))
-            (setf board (car (insert-element-into-board line board)))
-            (setf elements_left (- elements_left 1)))
-        (return-from read-file (list board elements_left))))
-        
+  * (with-open-file (stream file_name)
+    (setf dim (parse-integer (read-line stream nil)))
+    (setf elements_left (* dim dim))
+    (setf board (make-array (list dim dim)))
+    (do ((line (read-line stream nil)
+      (read-line stream nil)))
+      ((null line))
+      (setf board (car (insert-element-into-board line board)))
+      (setf elements_left (- elements_left 1)))
+    (return-from read-file (list board elements_left))))
 
 (defun print-board (board)
-    (loop for i below (array-total-size board) do
-        (if (zerop (mod i (array-dimension board 0)))
-            (terpri)
-            (princ #\Space))
-        (setf elmt (row-major-aref board i))
-        (if (null elmt)
+  (loop for i below (array-total-size board) do
+    (if (zerop (mod i (array-dimension board 0)))
+      (terpri)
+      (princ #\Space))
+
+        (let ((elmt (row-major-aref board i))) (
+          if (null elmt)
             (progn
-                (princ #\Space)
-                (princ #\Space))
+              (princ #\Space)
+              (princ #\Space))
             (progn
-                (if (> 10 elmt)
-                    (progn
-                        (princ #\Space)
-                        (princ elmt))
-                (princ elmt)))))
-    (terpri))
+              (if (> 10 elmt)
+                (progn
+                  (princ #\Space)
+                  (princ elmt))
+                (princ elmt))))))
+  (terpri))
