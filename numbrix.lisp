@@ -4,6 +4,8 @@
     (read-line *query-io*))
 
 (defun numbrix ()
+  (setq play_again T)
+  (loop while play_again do
     (setf input 
       (prompt-read 
         "Hello, welcome to Numbrix.
@@ -13,7 +15,7 @@
     (setf elements_left (car (cdr info)))
     (print-board board)
 
-    (loop while (not (<= elements_left 0)) do
+    (loop while (> elements_left 0) do
       (setf input 
             (prompt-read "Enter in your position 
             \(row col element\)"))
@@ -23,12 +25,74 @@
       (if is_null_value
         (setf elements_left (- elements_left 1)))
       (print-board board)
-      (print elements_left)
+      (print elements_left))
     
       (if (= elements_left 0)
-        (check-if-correct board))))
+        (progn
+          (if (check-if-correct board)
+            (print "You won!")
+            (print "You lost."))
+          (setq play_again
+            (prompt-read "Would you like to play again? \( '1' or '0'\)"))
+          (if (= (parse-integer play_again) 1)
+            (setq play_again T)
+            (setq play_again nil))))))
 
-(defun check-if-correct (board) )
+(defun check-if-correct (board) 
+  (let ((index (find-one board)))
+    (check-board board index)))
+
+(defun check-board (board start_index)
+  (let ((neighbors (grab-neighbors board start_index))
+        (elmt (aref board (car start_index) (car (cdr start_index))))
+        (row (car start_index))
+        (col (car (cdr start_index)))
+        (max (expt (array-dimension board 0) 2) ))
+    (loop for i in neighbors do
+        (if (and (not (null i)) (= (+ elmt 1) i))
+          (progn
+            (let ((loc (position i neighbors)))
+              (if (= loc 0)
+                (return-from check-board 
+                  (check-board board (list (- row 1) col))))
+              (if (= loc 1)
+                (return-from check-board 
+                  (check-board board (list row (- col 1)))))
+              (if (= loc 2)
+                (return-from check-board 
+                  (check-board board (list (+ row 1) col 1))))
+              (if (= loc 3)
+                (return-from check-board 
+                  (check-board board (list row (+ col 1))))))))
+        (if (= i max)
+          (return-from check-board T))
+    (return-from check-board nil))))
+
+(defun grab-neighbors (board index)
+  (let ((row (car index)) (col (car (cdr index))))
+    (if (= row 0)
+      (setq up nil)
+      (setq up (aref board (- row 1) col)))
+    (if (= col 0)
+      (setq left nil)
+      (setq left (aref board row (- col 1))))
+    (if (= row (- (array-dimension board 1) 1))
+      (setq down nil)
+      (setq down (aref board (+ row 1) col)))
+    (if (= col (- (array-dimension board 1) 1))
+      (setq right nil)
+      (setq right (aref board row (+ col 1))))
+    (list up left down right)))
+
+(defun find-one (board) 
+  (loop for i below (array-total-size board) do
+    (if (not (null (position 1 (array-slice board i))))
+      (return-from find-one (list i (position 1 (array-slice board i)))))))
+
+(defun array-slice (arr row)
+  (make-array (array-dimension arr 1)
+    :displaced-to arr
+    :displaced-index-offset (* row (array-dimension arr 1))))
 
 (defun insert-element-into-board (element board)
     (setf dim (array-dimension board 0))
