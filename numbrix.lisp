@@ -8,11 +8,29 @@
   (setq play_again T)
   (loop while play_again do
     (setf original (list ))
-    (setf input 
-      (prompt-read 
-        "Hello, welcome to Numbrix.
-        Please enter in the file you would like to load"))
+    (setf input (prompt-read 
+"Hello, welcome to Numbrix.
+
+The goal of the game is to be able to create a linear (no diaganols!) path of numbers starting from 1 to n, where n x n is the size of the board.
+
+The first row is the bottom row, and the first column is on the left.
+
+In order to play the game, enter in your answers by:
+        row col number (i.e. 2 2 5)
+Where row is from 1 to n, and col is from 1 to n.
+
+You CANNOT change values that were in the original game board.
+
+Good luck!
+
+Please enter in the file you would like to load"))
+
     (setf info (read-file input))
+    (if (null info)
+      (progn
+        (print "There was a problem reading the file. Please try again.")
+        (return-from numbrix nil)))
+
     (setf board (car info))
     (setf elements_left (car (cdr info)))
     (print-board board)
@@ -38,7 +56,7 @@
             (prompt-read "Would you like to play again? \( '1' or '0'\)"))
           (if (= (parse-integer play_again) 1)
             (setq play_again T)
-            (setq play_again nil))))))
+            (setq play_again nil)))))))
 
 (defun check-if-correct (board) 
   (let ((index (find-one board)))
@@ -106,6 +124,9 @@
     (setf col (parse-integer (cadr newlist)))
     (setf elmt (parse-integer (caddr newlist)))
 
+    (if (or (> row dim) (> col dim))
+      (return-from insert-element-into-board (list board nil)))
+
     (if (not (null (position 
         (list (write-to-string row) (write-to-string col) 
               (write-to-string (aref board (- dim row) (- col 1))))  
@@ -125,6 +146,8 @@
     while j))
 
 (defun read-file (file_name)
+    (if (null (probe-file file_name))
+      (return-from read-file nil))
   * (with-open-file (stream file_name)
     (setf dim (parse-integer (read-line stream nil)))
     (setf elements_left (* dim dim))
