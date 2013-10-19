@@ -4,8 +4,10 @@
     (read-line *query-io*))
 
 (defun numbrix ()
+  
   (setq play_again T)
   (loop while play_again do
+    (setf original (list ))
     (setf input 
       (prompt-read 
         "Hello, welcome to Numbrix.
@@ -21,7 +23,7 @@
             \(row col element\)"))
       (setf results (insert-element-into-board input board))
       (setf board (car results))
-      (setf null_value (car (cdr results)))
+      (setf is_null_value (car (cdr results)))
       (if is_null_value
         (setf elements_left (- elements_left 1)))
       (print-board board)
@@ -50,7 +52,7 @@
         (max (expt (array-dimension board 0) 2) ))
     (loop for i in neighbors do
         (if (and (not (null i)) (= (+ elmt 1) i))
-          (progn
+	  (progn
             (let ((loc (position i neighbors)))
               (if (= loc 0)
                 (return-from check-board 
@@ -63,10 +65,10 @@
                   (check-board board (list (+ row 1) col 1))))
               (if (= loc 3)
                 (return-from check-board 
-                  (check-board board (list row (+ col 1))))))))
-        (if (= i max)
+                  (check-board board (list row (+ col 1)))))))))
+        (if (= elmt max)
           (return-from check-board T))
-    (return-from check-board nil))))
+    (return-from check-board nil)))
 
 (defun grab-neighbors (board index)
   (let ((row (car index)) (col (car (cdr index))))
@@ -96,14 +98,31 @@
 
 (defun insert-element-into-board (element board)
     (setf dim (array-dimension board 0))
-    (setf row (parse-integer (subseq element 0 1)))
-    (setf col (parse-integer (subseq element 2 3)))
-    (setf elmt (parse-integer (subseq element 4)))
+    (if (> 5 (length element))
+      (return-from insert-element-into-board (list board nil)))
+    (setf newlist (split-by-one-space element))
+
+    (setf row (parse-integer (car newlist)))
+    (setf col (parse-integer (cadr newlist)))
+    (setf elmt (parse-integer (caddr newlist)))
+
+    (if (not (null (position 
+        (list (write-to-string row) (write-to-string col) 
+              (write-to-string (aref board (- dim row) (- col 1))))  
+              original :test #'equal)))
+      (return-from insert-element-into-board (list board nil)))
+
     (setf row (- dim row))
     (setf col (- col 1))
     (setf is_null_value (null (aref board row col)))
     (setf (aref board row col) elmt)
     (return-from insert-element-into-board (list board is_null_value)))
+
+* (defun split-by-one-space (string)
+  (loop for i = 0 then (1+ j)
+    as j = (position #\Space string :start i)
+    collect (subseq string i j)
+    while j))
 
 (defun read-file (file_name)
   * (with-open-file (stream file_name)
@@ -114,6 +133,10 @@
       (read-line stream nil)))
       ((null line))
       (setf board (car (insert-element-into-board line board)))
+
+      (setf newlist (split-by-one-space line))
+      (setf original (nconc original (list newlist)))
+
       (setf elements_left (- elements_left 1)))
     (return-from read-file (list board elements_left))))
 
