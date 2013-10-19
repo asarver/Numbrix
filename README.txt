@@ -1,3 +1,12 @@
+To run:
+
+$gcl
+> (load "numbrix.lisp")
+> (numbrix)
+
+
+Test cases are located under Tests.
+
 A program that implements the game called Numbrix. The game is played on a square grid that starts with various positions filled with numbers. The objective of the game is to place numbers into the open cells so they make the path in numerical order. Only horizontal and veritcal paths are allowed.
 
 As of right now, this program reads in a text file that specifies the current board. The board size is specified by a number, and its contents are specified by 'row col number' (where 1,1 is the left bottom corner). An example text file with a board of size 8x8 would look like:
