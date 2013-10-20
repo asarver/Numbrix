@@ -54,7 +54,7 @@ Please enter in the file you would like to load"))
             (print "You lost."))
           (setq play_again
             (prompt-read "Would you like to play again? \( '1' or '0'\)"))
-          (if (= (parse-integer play_again) 1)
+          (if (= (parse-integer play_again :junk-allowed t) 1)
             (setq play_again T)
             (setq play_again nil)))))))
 
@@ -120,11 +120,14 @@ Please enter in the file you would like to load"))
       (return-from insert-element-into-board (list board nil)))
     (setf newlist (split-by-one-space element))
 
-    (setf row (parse-integer (car newlist)))
-    (setf col (parse-integer (cadr newlist)))
-    (setf elmt (parse-integer (caddr newlist)))
+    (setf row (parse-integer (car newlist) :junk-allowed t))
+    (setf col (parse-integer (cadr newlist) :junk-allowed t))
+    (setf elmt (parse-integer (caddr newlist) :junk-allowed t))
 
-    (if (or (> row dim) (> col dim))
+    (if (or (null row) (null col) (null elmt))
+      (return-from insert-element-into-board (list board nil)))
+
+    (if (or (> row dim) (> col dim) (<= row 0) (<= col 0))
       (return-from insert-element-into-board (list board nil)))
 
     (if (not (null (position 
