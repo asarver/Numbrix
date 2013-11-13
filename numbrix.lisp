@@ -44,14 +44,13 @@ Please enter in the file you would like to load"))
       (setf is_null_value (car (cdr results)))
       (if is_null_value
         (setf elements_left (- elements_left 1)))
-      (print-board board)
-      (print elements_left))
+      (print-board board))
     
       (if (= elements_left 0)
         (progn
           (if (check-if-correct board)
-            (print "You won!")
-            (print "You lost."))
+            (princ "You won!")
+            (princ "You lost."))
           (setq play_again
             (prompt-read "Would you like to play again? \( '1' or '0'\)"))
           (if (= (parse-integer play_again :junk-allowed t) 1)
@@ -117,7 +116,9 @@ Please enter in the file you would like to load"))
 (defun insert-element-into-board (element board)
     (setf dim (array-dimension board 0))
     (if (> 5 (length element))
-      (return-from insert-element-into-board (list board nil)))
+      (progn
+        (princ "Please enter in a valid row col elmt tuple.")
+        (return-from insert-element-into-board (list board nil))))
     (setf newlist (split-by-one-space element))
 
     (setf row (parse-integer (car newlist) :junk-allowed t))
@@ -125,16 +126,22 @@ Please enter in the file you would like to load"))
     (setf elmt (parse-integer (caddr newlist) :junk-allowed t))
 
     (if (or (null row) (null col) (null elmt))
-      (return-from insert-element-into-board (list board nil)))
+      (progn
+        (princ "Please enter in a valid row col elmt tuple.")
+        (return-from insert-element-into-board (list board nil))))
 
     (if (or (> row dim) (> col dim) (<= row 0) (<= col 0))
-      (return-from insert-element-into-board (list board nil)))
+      (progn
+        (format *query-io* "Sorry ~a ~a is not a valid position" row col)
+        (return-from insert-element-into-board (list board nil))))
 
     (if (not (null (position 
         (list (write-to-string row) (write-to-string col) 
               (write-to-string (aref board (- dim row) (- col 1))))  
               original :test #'equal)))
-      (return-from insert-element-into-board (list board nil)))
+      (progn
+        (princ "You cannot change an original value.")
+        (return-from insert-element-into-board (list board nil))))
 
     (setf row (- dim row))
     (setf col (- col 1))
@@ -169,7 +176,12 @@ Please enter in the file you would like to load"))
 (defun print-board (board)
   (loop for i below (array-total-size board) do
     (if (zerop (mod i (array-dimension board 0)))
-      (terpri)
+      (progn
+        (terpri)
+            (if (> 1 (/ i 10))
+              (princ "[ ")
+              (princ "["))
+        (princ (concatenate 'string (write-to-string i) "]" )))
       (princ #\Space))
 
         (let ((elmt (row-major-aref board i))) (
