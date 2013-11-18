@@ -178,33 +178,47 @@ Please enter in the file you would like to load"))
     (if (zerop (mod i (array-dimension board 0)))
       (progn
         (terpri)
-            (if (< 1 (/ i 10))
-              (progn
-                (if (< 1 (/ (/ i 10)))
-                  (princ "[")
-                (princ "[ ")))
-            (princ "[  "))
-        (princ (concatenate 'string 
+            (if (< 10 (- (array-dimension board 0) (/ i (array-dimension board 0))))
+              (princ "[")
+            (princ "[ "))
+        (princ (concatenate 'string
                             (write-to-string (- (array-dimension board 0)
-                                                (/ i (array-dimension board 0)))) "]" )))
-      (princ #\Space))
+                                                (/ i (array-dimension board 0)))) "] " )))
+      (progn (princ #\Space)))
 
         (let ((elmt (row-major-aref board i))) (
           if (null elmt)
             (progn
               (princ #\Space)
               (princ #\Space)
+              (princ #\Space)
               (princ #\Space))
             (progn
               (if (< 10 elmt)
                 (progn
-                  (if (> 100 elmt)
-                    (princ elmt))
+                  (if (< 100 elmt)
+                    (progn
+                    (princ elmt)
+                    (princ #\Space))
                   (progn
                     (princ #\Space)
-                    (princ elmt))))
+                    (princ elmt)
+                    (princ #\Space))))
               (progn
                 (princ #\Space)
                 (princ #\Space)
-                (princ elmt))))))
-  (terpri))
+                (princ elmt)
+                (princ #\Space)))))))
+  (terpri)
+  (princ #\Space)
+  (princ #\Space)
+  (princ #\Space)
+  (princ #\Space)
+  (loop for i below (array-dimension board 0) do
+    (if (< 1 (/ i 10))
+      (princ "[ ")
+    (princ "[  "))
+    (princ (concatenate 'string
+            (write-to-string (+ i 1)) "]" )))
+  (terpri)
+    (princ #\Space))
