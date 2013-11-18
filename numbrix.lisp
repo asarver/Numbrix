@@ -4,11 +4,11 @@
     (read-line *query-io*))
 
 (defun numbrix ()
-  
+
   (setq play_again T)
   (loop while play_again do
     (setf original (list ))
-    (setf input (prompt-read 
+    (setf input (prompt-read
 "Hello, welcome to Numbrix.
 
 The goal of the game is to be able to create a linear (no diaganols!) path of numbers starting from 1 to n, where n x n is the size of the board.
@@ -36,8 +36,8 @@ Please enter in the file you would like to load"))
     (print-board board)
 
     (loop while (> elements_left 0) do
-      (setf input 
-            (prompt-read "Enter in your position 
+      (setf input
+            (prompt-read "Enter in your position
             \(row col element\)"))
       (setf results (insert-element-into-board input board))
       (setf board (car results))
@@ -45,7 +45,7 @@ Please enter in the file you would like to load"))
       (if is_null_value
         (setf elements_left (- elements_left 1)))
       (print-board board))
-    
+
       (if (= elements_left 0)
         (progn
           (if (check-if-correct board)
@@ -55,9 +55,9 @@ Please enter in the file you would like to load"))
             (prompt-read "Would you like to play again? \( '1' or '0'\)"))
           (if (= (parse-integer play_again :junk-allowed t) 1)
             (setq play_again T)
-            (setq play_again nil)))))))
+            (setq play_again nil))))))
 
-(defun check-if-correct (board) 
+(defun check-if-correct (board)
   (let ((index (find-one board)))
     (check-board board index)))
 
@@ -72,16 +72,16 @@ Please enter in the file you would like to load"))
 	  (progn
             (let ((loc (position i neighbors)))
               (if (= loc 0)
-                (return-from check-board 
+                (return-from check-board
                   (check-board board (list (- row 1) col))))
               (if (= loc 1)
-                (return-from check-board 
+                (return-from check-board
                   (check-board board (list row (- col 1)))))
               (if (= loc 2)
-                (return-from check-board 
+                (return-from check-board
                   (check-board board (list (+ row 1) col 1))))
               (if (= loc 3)
-                (return-from check-board 
+                (return-from check-board
                   (check-board board (list row (+ col 1)))))))))
         (if (= elmt max)
           (return-from check-board T))
@@ -103,7 +103,7 @@ Please enter in the file you would like to load"))
       (setq right (aref board row (+ col 1))))
     (list up left down right)))
 
-(defun find-one (board) 
+(defun find-one (board)
   (loop for i below (array-total-size board) do
     (if (not (null (position 1 (array-slice board i))))
       (return-from find-one (list i (position 1 (array-slice board i)))))))
@@ -135,9 +135,9 @@ Please enter in the file you would like to load"))
         (format *query-io* "Sorry ~a ~a is not a valid position" row col)
         (return-from insert-element-into-board (list board nil))))
 
-    (if (not (null (position 
-        (list (write-to-string row) (write-to-string col) 
-              (write-to-string (aref board (- dim row) (- col 1))))  
+    (if (not (null (position
+        (list (write-to-string row) (write-to-string col)
+              (write-to-string (aref board (- dim row) (- col 1))))
               original :test #'equal)))
       (progn
         (princ "You cannot change an original value.")
@@ -178,21 +178,33 @@ Please enter in the file you would like to load"))
     (if (zerop (mod i (array-dimension board 0)))
       (progn
         (terpri)
-            (if (> 1 (/ i 10))
-              (princ "[ ")
-              (princ "["))
-        (princ (concatenate 'string (write-to-string i) "]" )))
+            (if (< 1 (/ i 10))
+              (progn
+                (if (< 1 (/ (/ i 10)))
+                  (princ "[")
+                (princ "[ ")))
+            (princ "[  "))
+        (princ (concatenate 'string 
+                            (write-to-string (- (array-dimension board 0)
+                                                (/ i (array-dimension board 0)))) "]" )))
       (princ #\Space))
 
         (let ((elmt (row-major-aref board i))) (
           if (null elmt)
             (progn
               (princ #\Space)
+              (princ #\Space)
               (princ #\Space))
             (progn
-              (if (> 10 elmt)
+              (if (< 10 elmt)
                 (progn
-                  (princ #\Space)
-                  (princ elmt))
+                  (if (> 100 elmt)
+                    (princ elmt))
+                  (progn
+                    (princ #\Space)
+                    (princ elmt))))
+              (progn
+                (princ #\Space)
+                (princ #\Space)
                 (princ elmt))))))
   (terpri))
