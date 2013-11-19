@@ -3,12 +3,12 @@
     (force-output *query-io*)
     (read-line *query-io*))
 
-(defun numbrix ()
+(defun numbrix()
+  (let ((input (ask-for-file)))
+    (play-numbrix input)))
 
-  (setq play_again T)
-  (loop while play_again do
-    (setf original (list ))
-    (setf input (prompt-read
+(defun ask-for-file ()
+    (return-from ask-for-file (prompt-read
 "Hello, welcome to Numbrix.
 
 The goal of the game is to be able to create a linear (no diaganols!) path of numbers starting from 1 to n, where n x n is the size of the board.
@@ -23,13 +23,15 @@ You CANNOT change values that were in the original game board.
 
 Good luck!
 
-Please enter in the file you would like to load"))
+Please enter in the file you would like to load")))
 
+(defun play-numbrix (input)
+    (setf original (list ))
     (setf info (read-file input))
     (if (null info)
       (progn
         (print "There was a problem reading the file. Please try again.")
-        (return-from numbrix nil)))
+        (return-from play-numbrix nil)))
 
     (setf board (car info))
     (setf elements_left (cadr info))
@@ -59,8 +61,8 @@ Please enter in the file you would like to load"))
           (setq play_again
             (prompt-read "Would you like to play again? \( '1' or '0'\)"))
           (if (= (parse-integer play_again :junk-allowed t) 1)
-            (setq play_again T)
-            (setq play_again nil))))))
+            (numbrix)
+            (return-from play-numbrix nil)))))
 
 (defun read-file (file_name)
     (if (null (probe-file file_name))
@@ -84,4 +86,18 @@ Please enter in the file you would like to load"))
     (return-from read-file (list board elements_left min_elmt))))
 
 (defun solve-game (board)
-)
+  (let ((input (ask-for-file)))
+    (setf original (list ))
+    (setf info (read-file input))
+    (if (null info)
+      (progn
+        (print "There was a problem reading the file. Please try again.")
+        (return-from solve-game nil)))
+
+    (setf board (car info))
+    (setf elements_left (cadr info))
+    (setf min_elmt (caddr info))
+    (print "min elmt")
+    (print min_elmt)
+    (terpri)
+    (print-board board)))

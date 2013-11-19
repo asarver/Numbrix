@@ -1,5 +1,5 @@
 (defun check-if-correct (board)
-  (let ((index (find-one board)))
+  (let ((index (find-elmt board 1)))
     (check-board board index)))
 
 (defun check-board (board start_index)
@@ -44,10 +44,10 @@
     (setq right (aref board row (+ col 1))))
     (list up left down right)))
 
-(defun find-one (board)
+(defun find-elmt (board elmt)
   (loop for i below (array-total-size board) do
-    (if (not (null (position 1 (array-slice board i))))
-      (return-from find-one (list i (position 1 (array-slice board i)))))))
+    (if (not (null (position elmt (array-slice board i))))
+      (return-from find-elmt (list i (position elmt (array-slice board i)))))))
 
 (defun insert-element-into-board (element board min_elmt)
     (setf dim (array-dimension board 0))
