@@ -32,16 +32,21 @@ Please enter in the file you would like to load"))
         (return-from numbrix nil)))
 
     (setf board (car info))
-    (setf elements_left (car (cdr info)))
+    (setf elements_left (cadr info))
+    (setf min_elmt (caddr info))
+    (print "min elmt")
+    (print min_elmt)
+    (terpri)
     (print-board board)
 
     (loop while (> elements_left 0) do
       (setf input
             (prompt-read "Enter in your position
             \(row col element\)"))
-      (setf results (insert-element-into-board input board))
+      (setf results (insert-element-into-board input board min_elmt))
       (setf board (car results))
-      (setf is_null_value (car (cdr results)))
+      (setf is_null_value (cadr results))
+      (setf min_elmt (caddr results))
       (if is_null_value
         (setf elements_left (- elements_left 1)))
       (print-board board))
@@ -62,18 +67,21 @@ Please enter in the file you would like to load"))
       (return-from read-file nil))
   * (with-open-file (stream file_name)
     (setf dim (parse-integer (read-line stream nil)))
+    (setf min_elmt (* dim dim))
     (setf elements_left (* dim dim))
     (setf board (make-array (list dim dim)))
     (do ((line (read-line stream nil)
       (read-line stream nil)))
       ((null line))
-      (setf board (car (insert-element-into-board line board)))
+      (setf info (insert-element-into-board line board min_elmt))
+      (setf board (car info))
+      (setf min_elmt (caddr info))
 
       (setf newlist (split-by-one-space line))
       (setf original (nconc original (list newlist)))
 
       (setf elements_left (- elements_left 1)))
-    (return-from read-file (list board elements_left))))
+    (return-from read-file (list board elements_left min_elmt))))
 
 (defun solve-game (board)
 )

@@ -49,7 +49,7 @@
     (if (not (null (position 1 (array-slice board i))))
       (return-from find-one (list i (position 1 (array-slice board i)))))))
 
-(defun insert-element-into-board (element board)
+(defun insert-element-into-board (element board min_elmt)
     (setf dim (array-dimension board 0))
     (if (> 5 (length element))
       (progn
@@ -83,7 +83,9 @@
     (setf col (- col 1))
     (setf is_null_value (null (aref board row col)))
     (setf (aref board row col) elmt)
-    (return-from insert-element-into-board (list board is_null_value)))
+    (if (< elmt min_elmt)
+      (return-from insert-element-into-board (list board is_null_value elmt))
+    (return-from insert-element-into-board (list board is_null_value min_elmt))))
 
 (defun print-board (board)
   (loop for i below (array-total-size board) do
