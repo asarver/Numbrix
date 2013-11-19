@@ -1,6 +1,8 @@
 To run:
 
 $gcl
+> (load "board_functions.lisp")
+> (load "utilities.lisp")
 > (load "numbrix.lisp")
 > (numbrix)
 
