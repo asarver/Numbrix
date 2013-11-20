@@ -50,16 +50,15 @@
       (return-from find-elmt (list i (position elmt (array-slice board i)))))))
 
 (defun insert-element-into-board (element board min_elmt)
-    (setf dim (array-dimension board 0))
+  (let ((dim (array-dimension board 0)))
     (if (> 5 (length element))
       (progn
         (princ "Please enter in a valid row col elmt tuple.")
         (return-from insert-element-into-board (list board nil))))
-    (setf newlist (split-by-one-space element))
-
-    (setf row (parse-integer (car newlist) :junk-allowed t))
-    (setf col (parse-integer (cadr newlist) :junk-allowed t))
-    (setf elmt (parse-integer (caddr newlist) :junk-allowed t))
+    (let ((newlist (split-by-one-space element)))
+      (let ((row (parse-integer (car newlist) :junk-allowed t))
+            (col (parse-integer (cadr newlist) :junk-allowed t))
+            (elmt (parse-integer (caddr newlist) :junk-allowed t)))
 
     (if (or (null row) (null col) (null elmt))
       (progn
@@ -71,21 +70,24 @@
         (format *query-io* "Sorry ~a ~a is not a valid position" row col)
         (return-from insert-element-into-board (list board nil))))
 
-    (if (not (null (position
-        (list (write-to-string row) (write-to-string col)
+    (if 
+      (not 
+        (null 
+          (position 
+            (list 
+              (write-to-string row) 
+              (write-to-string col)
               (write-to-string (aref board (- dim row) (- col 1))))
-              original :test #'equal)))
+            original :test #'equal)))
       (progn
         (princ "You cannot change an original value.")
         (return-from insert-element-into-board (list board nil))))
 
-    (setf row (- dim row))
-    (setf col (- col 1))
-    (setf is_null_value (null (aref board row col)))
-    (setf (aref board row col) elmt)
-    (if (< elmt min_elmt)
-      (return-from insert-element-into-board (list board is_null_value elmt))
-    (return-from insert-element-into-board (list board is_null_value min_elmt))))
+    (let ((is_null_value (null (aref board (- dim row) (- col 1)))))
+      (setf (aref board (- dim row) (- col 1)) elmt)
+      (if (< elmt min_elmt)
+        (return-from insert-element-into-board (list board is_null_value elmt))
+      (return-from insert-element-into-board (list board is_null_value min_elmt))))))))
 
 (defun print-board (board)
   (loop for i below (array-total-size board) do
