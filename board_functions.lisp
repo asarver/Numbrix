@@ -96,32 +96,93 @@
         (return-from insert-element-into-board (list board is_null_value elmt))
       (return-from insert-element-into-board (list board is_null_value min_elmt))))))))
 
-(defun insert-null-element (element board)
-  (let ((dim (array-dimension board 0)))
-    (if (> 5 (length element))
-      (progn
-        (princ "Please enter in a valid row col elmt tuple.")
-        (return-from insert-element-into-board (list board nil))))
-    (let ((newlist (split-by-one-space element)))
-      (let ((row (parse-integer (car newlist) :junk-allowed t))
-            (col (parse-integer (cadr newlist) :junk-allowed t))
-            (elmt (parse-integer (caddr newlist) :junk-allowed t)))
-    (if
-      (not
-        (null
-          (position
-            (list
-              (write-to-string row)
-              (write-to-string col)
-              (write-to-string (aref board (- dim row) (- col 1))))
-            original :test #'equal)))
-      (progn
-        (princ "You cannot change an original value.")
-        (return-from insert-element-into-board (list board nil))))
+(defun insert-known-elements (board)
+  (loop for i below (array-total-size board) do
+    (let ((elmt (row-major-aref board i)))
+      (if (not (null elmt))
+       (progn
+      (let ((location (find-elmt board elmt)))
+      (let ((neighbors (grab-neighbors board location))
+            (row (car location))
+            (col (cadr location)))
+        (setf count_neighbors 0)
+        (loop for i in neighbors do
+          (if (not (null i))
+            (setf count_neighbors (+ count_neighbors 1))))
+      (let ((up (car neighbors))
+            (left (cadr neighbors))
+            (down (caddr neighbors))
+            (right (cadddr neighbors)))
+        (setf more nil)
+        (setf less nil)
+      (if (not (null up))
+        (progn
+          (if (= up (+ elmt 1))
+            (setf more t))
+          (if (= up (- elmt 1))
+            (setf less t))))
+      (if (not (null left))
+        (progn
+          (if (= left (+ elmt 1))
+            (setf more t))
+          (if (= left (- elmt 1))
+            (setf less t))))
+      (if (not (null down))
+        (progn
+          (if (= down (+ elmt 1))
+            (setf more t))
+          (if (= down (- elmt 1))
+            (setf less t))))
+      (if (not (null right))
+        (progn
+          (if (= right (+ elmt 1))
+            (setf more t))
+          (if (= right (- elmt 1))
+            (setf less t))))
 
-    (let ((is_null_value (null (aref board (- dim row) (- col 1)))))
-      (setf (aref board (- dim row) (- col 1)) elmt)
-      (return-from insert-null-element (list board is_null_value)))))))
+      (if (not (and more less))
+       (progn
+      (if (and (= 3 count_neighbors) more (not (= elmt 1)))
+        (progn
+        (if (null up)
+          (progn
+            (setf board (car (insert-into-board (list (- row 1) col (- elmt 1)) board)))
+            (print-board board)))
+        (if (null left)
+          (progn
+            (setf board (car (insert-into-board (list row (- col 1) (- elmt 1)) board)))
+            (print-board board)))
+        (if (null down)
+          (progn
+            (setf board (car (insert-into-board (list (+ row 1) col (- elmt 1)) board)))
+            (print-board board)))
+        (if (null right)
+          (progn
+            (setf board (car (insert-into-board (list row (+ col 1) (- elmt 1)) board)))
+            (print-board board)))))
+      (if (and (= 3 count_neighbors) less
+               (not (= elmt (expt (array-dimension board 0) 2))))
+        (progn
+        (if (null up)
+          (progn
+            (setf board (car (insert-into-board (list (- row 1) col (+ elmt 1)) board)))
+            (print-board board)))
+        (if (null left)
+          (progn
+            (setf board (car (insert-into-board (list row (- col 1) (+ elmt 1)) board)))
+            (print-board board)))
+        (if (null down)
+          (progn
+            (setf board (car (insert-into-board (list (+ row 1) col (+ elmt 1)) board)))
+            (print-board board)))
+        (if (null right)
+          (progn
+            (setf board (car (insert-into-board (list row (+ col 1) (+ elmt 1)) board)))
+            (print-board board)))))
+
+        )))))))))
+  (return-from insert-known-elements board))
+
 
 (defun print-board (board)
   (loop for i below (array-total-size board) do
