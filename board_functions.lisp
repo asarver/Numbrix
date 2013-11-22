@@ -45,9 +45,42 @@
     (list up left down right)))
 
 (defun find-elmt (board elmt)
-  (loop for i below (array-total-size board) do
+  (loop for i below (array-dimension board 0) do
     (if (not (null (position elmt (array-slice board i))))
-      (return-from find-elmt (list i (position elmt (array-slice board i)))))))
+      (return-from find-elmt (list i (position elmt (array-slice board i))))))
+  (return-from find-elmt nil))
+
+(defun is-elmt-in (board elmt)
+  (let ((result (find-elmt board elmt)))
+    (return-from is-elmt-in (not (null result)))))
+
+(defun validate-input (element dim)
+  (if (> 5 (length element))
+    (return-from validate-input nil))
+  (let ((newlist (split-by-one-space element)))
+    (let ((row (parse-integer (car newlist) :junk-allowed t))
+          (col (parse-integer (cadr newlist) :junk-allowed t))
+          (elmt (parse-integer (caddr newlist) :junk-allowed t)))
+
+      (if (or (null row) (null col) (null elmt))
+        (return-from validate-input nil))
+
+      (if (or (> row dim) (> col dim) (<= row 0) (<= col 0))
+        (return-from validate-input nil))
+
+      (if
+        (not
+          (null
+            (position
+              (list
+                (write-to-string row)
+                (write-to-string col)
+                (write-to-string (aref board (- dim row) (- col 1))))
+                                  original :test #'equal)))
+      (progn
+        (princ "You cannot change an original value.")
+        (return-from validate-input nil)))
+      (return-from validate-input (list row col elmt)))))
 
 (defun insert-into-board (elmt_list board )
   (let ((row (car elmt_list))
@@ -58,37 +91,14 @@
 
 (defun insert-element-into-board (element board min_elmt)
   (let ((dim (array-dimension board 0)))
-    (if (> 5 (length element))
+    (let ((result (validate-input element dim)))
+    (if (null result)
       (progn
-        (princ "Please enter in a valid row col elmt tuple.")
-        (return-from insert-element-into-board (list board nil))))
-    (let ((newlist (split-by-one-space element)))
-      (let ((row (parse-integer (car newlist) :junk-allowed t))
-            (col (parse-integer (cadr newlist) :junk-allowed t))
-            (elmt (parse-integer (caddr newlist) :junk-allowed t)))
-
-    (if (or (null row) (null col) (null elmt))
-      (progn
-        (princ "Please enter in a valid row col elmt tuple.")
-        (return-from insert-element-into-board (list board nil))))
-
-    (if (or (> row dim) (> col dim) (<= row 0) (<= col 0))
-      (progn
-        (format *query-io* "Sorry ~a ~a is not a valid position" row col)
-        (return-from insert-element-into-board (list board nil))))
-
-    (if
-      (not
-        (null
-          (position
-            (list
-              (write-to-string row)
-              (write-to-string col)
-              (write-to-string (aref board (- dim row) (- col 1))))
-            original :test #'equal)))
-      (progn
-        (princ "You cannot change an original value.")
-        (return-from insert-element-into-board (list board nil))))
+        (princ "please enter in a valid row col elmt tuple.")
+        (return-from insert-element-into-board (list board nil min_elmt))))
+    (let ((row (car result))
+          (col (cadr result))
+          (elmt (caddr result)))
 
     (let ((is_null_value (null (aref board (- dim row) (- col 1)))))
       (setf (aref board (- dim row) (- col 1)) elmt)

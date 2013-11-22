@@ -119,7 +119,6 @@ Please enter in the file you would like to load")))
         (if (= direction 1)
           (setf next (+ elmt 1))
         (setf next (- elmt 1)))
-        (print next)
         (if (not (null up))
           (progn
             (if (= up next)
@@ -136,8 +135,8 @@ Please enter in the file you would like to load")))
           (progn
             (if (= right next)
               (return-from depth-first (depth-first board (list row (+ col 1)) direction)))))
-        (if (and (not (null up)) (not (null left)) (not (null down))
-                 (not (null right)))
+        (if (or (and (not (null up)) (not (null left)) (not (null down))
+                 (not (null right))) (is-elmt-in board next))
           (return-from depth-first -1))
         (if (null up)
           (progn
