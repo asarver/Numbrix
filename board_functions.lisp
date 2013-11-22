@@ -45,10 +45,16 @@
     (list up left down right)))
 
 (defun find-elmt (board elmt)
-  (print "in find-elmt")
   (loop for i below (array-total-size board) do
     (if (not (null (position elmt (array-slice board i))))
       (return-from find-elmt (list i (position elmt (array-slice board i)))))))
+
+(defun insert-into-board (elmt_list board )
+  (let ((row (car elmt_list))
+        (col (cadr elmt_list))
+        (elmt (caddr elmt_list)))
+  (setf (aref board row col) elmt)
+  (return-from insert-into-board (list board))))
 
 (defun insert-element-into-board (element board min_elmt)
   (let ((dim (array-dimension board 0)))
@@ -118,7 +124,6 @@
       (return-from insert-null-element (list board is_null_value)))))))
 
 (defun print-board (board)
-  (print "in print-board")
   (loop for i below (array-total-size board) do
     (if (zerop (mod i (array-dimension board 0)))
       (progn
