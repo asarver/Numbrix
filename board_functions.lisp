@@ -9,7 +9,7 @@
         (col (car (cdr start_index)))
         (max (expt (array-dimension board 0) 2) ))
     (loop for i in neighbors do
-      (if (and (not (null i)) (= (+ elmt 1) i))
+      (if (and (not (= 0 i)) (= (+ elmt 1) i))
         (progn
           (let ((loc (position i neighbors)))
             (if (= loc 0)
@@ -31,20 +31,21 @@
 (defun grab-neighbors (board index)
   (let ((row (car index)) (col (car (cdr index))))
     (if (= row 0)
-      (setq up nil)
+      (setq up 0)
     (setq up (aref board (- row 1) col)))
     (if (= col 0)
-      (setq left nil)
+      (setq left 0)
     (setq left (aref board row (- col 1))))
     (if (= row (- (array-dimension board 1) 1))
-      (setq down nil)
+      (setq down 0)
     (setq down (aref board (+ row 1) col)))
     (if (= col (- (array-dimension board 1) 1))
-      (setq right nil)
+      (setq right 0)
     (setq right (aref board row (+ col 1))))
     (list up left down right)))
 
 (defun find-elmt (board elmt)
+  (print "in find-elmt")
   (loop for i below (array-total-size board) do
     (if (not (null (position elmt (array-slice board i))))
       (return-from find-elmt (list i (position elmt (array-slice board i)))))))
@@ -70,12 +71,12 @@
         (format *query-io* "Sorry ~a ~a is not a valid position" row col)
         (return-from insert-element-into-board (list board nil))))
 
-    (if 
-      (not 
-        (null 
-          (position 
-            (list 
-              (write-to-string row) 
+    (if
+      (not
+        (null
+          (position
+            (list
+              (write-to-string row)
               (write-to-string col)
               (write-to-string (aref board (- dim row) (- col 1))))
             original :test #'equal)))
@@ -89,7 +90,35 @@
         (return-from insert-element-into-board (list board is_null_value elmt))
       (return-from insert-element-into-board (list board is_null_value min_elmt))))))))
 
+(defun insert-null-element (element board)
+  (let ((dim (array-dimension board 0)))
+    (if (> 5 (length element))
+      (progn
+        (princ "Please enter in a valid row col elmt tuple.")
+        (return-from insert-element-into-board (list board nil))))
+    (let ((newlist (split-by-one-space element)))
+      (let ((row (parse-integer (car newlist) :junk-allowed t))
+            (col (parse-integer (cadr newlist) :junk-allowed t))
+            (elmt (parse-integer (caddr newlist) :junk-allowed t)))
+    (if
+      (not
+        (null
+          (position
+            (list
+              (write-to-string row)
+              (write-to-string col)
+              (write-to-string (aref board (- dim row) (- col 1))))
+            original :test #'equal)))
+      (progn
+        (princ "You cannot change an original value.")
+        (return-from insert-element-into-board (list board nil))))
+
+    (let ((is_null_value (null (aref board (- dim row) (- col 1)))))
+      (setf (aref board (- dim row) (- col 1)) elmt)
+      (return-from insert-null-element (list board is_null_value)))))))
+
 (defun print-board (board)
+  (print "in print-board")
   (loop for i below (array-total-size board) do
     (if (zerop (mod i (array-dimension board 0)))
       (progn
@@ -97,9 +126,11 @@
             (if (< 10 (- (array-dimension board 0) (/ i (array-dimension board 0))))
               (princ "[")
             (princ "[ "))
-        (princ (concatenate 'string
-                            (write-to-string (- (array-dimension board 0)
-                                                (/ i (array-dimension board 0)))) "] " )))
+        (princ
+          (concatenate 'string
+                       (write-to-string
+                         (- (array-dimension board 0)
+                         (/ i (array-dimension board 0)))) "] " )))
       (progn (princ #\Space)))
 
         (let ((elmt (row-major-aref board i))) (
