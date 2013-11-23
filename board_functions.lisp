@@ -197,6 +197,14 @@
         )))))))))
   (return-from insert-known-elements board))
 
+(defun get-element (board location)
+  (let ((row (car location))
+        (col (cadr location))
+        (dim (- (array-dimension board 1) 1)))
+    (if (and (>= row 0) (>= col 0)
+             (<= row dim) (<= col dim))
+      (return-from get-element (aref board row col)))))
+
 (defun check-ahead (board)
   (loop for i below (array-total-size board) do
     (let ((elmt (row-major-aref board i)))
@@ -211,47 +219,62 @@
                     (setf count_neighbors (+ count_neighbors 1))))
             (if (< count_neighbors 3)
               (progn
-            (let ((ahead (+ elmt 2))
-                  (behind (- elmt 2))
+            (let ((two_ahead (+ elmt 2))
+                  (two_behind (- elmt 2))
                   (up (list (- row 1) col))
                   (left (list row (- col 1)))
                   (down (list (+ row 1) col))
                   (right (list row (+ col 1)))
-                  (next (+ elmt 1))
-                  (prev (- elmt 1)))
-              (if (is-elmt-in board ahead)
+                  (next_up (+ elmt 1))
+                  (next_prev (- elmt 1)))
+              (loop for next_pair in (list (list next_up two_ahead)
+                                           (list next_prev two_behind)) do
+                (let ((next (car next_pair))
+                      (ahead (cadr next_pair)))
+                  (print "this element")
+                  (print (get-element board location))
+              (if (and (not (is-elmt-in board next)) (is-elmt-in board ahead))
                 (progn
                   (setf possibilities 0)
-                  (loop for neighbor in (list up left down right) do
+                  (loop for n in (list up left down right) do
+                    (if (null (get-element board n))
+                      (progn
+                        (print n)
                         (if (not (null (member ahead
-                                               (grab-neighbors board neighbor))))
-                          (setf possibilities (+ possibilities 1))))
-                  (if (<= possibilities 1)
+                                               (grab-neighbors board n))))
+                          (setf possibilities (+ possibilities 1))))))
+                  (print possibilities)
+                  (if (= possibilities 1)
                     (progn
-                  (if (not (null (member ahead
-                                         (grab-neighbors board up))))
+                      (print "possibilities should be one")
+                  (if (and (null (get-element board up))
+                        (not (null (member ahead
+                                         (grab-neighbors board up)))))
                     (progn
                       (setf board (car (insert-into-board
                                          (append up (list next)) board)))
                       (print-board board)))
-                  (if (not (null (member ahead
-                                         (grab-neighbors board left))))
+                  (if (and (null (get-element board left))
+                           (not (null (member ahead
+                                         (grab-neighbors board left)))))
                     (progn
                       (setf board (car (insert-into-board
                                          (append left (list next)) board)))
                       (print-board board)))
-                  (if (not (null (member ahead
-                                         (grab-neighbors board down))))
+                  (if (and (null (get-element board down))
+                           (not (null (member ahead
+                                         (grab-neighbors board down)))))
                     (progn
                       (setf board (car (insert-into-board
                                          (append down (list next)) board)))
                       (print-board board)))
-                  (if (not (null (member ahead
-                                         (grab-neighbors board right))))
+                  (if (and (null (get-element board right))
+                           (not (null (member ahead
+                                         (grab-neighbors board right)))))
                     (progn
                       (setf board (car (insert-into-board
                                          (append right (list next)) board)))
-                      (print-board board)))))))))))))))
+                      (print-board board)))))))))))))))))
               (return-from check-ahead board))
 
 
