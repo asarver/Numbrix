@@ -3,15 +3,21 @@
     (check-board board index)))
 
 (defun check-board (board start_index)
+  (if (null start_index)
+    (return-from check-board nil))
   (let ((neighbors (grab-neighbors board start_index))
         (elmt (aref board (car start_index) (car (cdr start_index))))
         (row (car start_index))
         (col (car (cdr start_index)))
         (max (expt (array-dimension board 0) 2) ))
     (loop for i in neighbors do
+      (if  (null i)
+        (return-from check-board nil))
       (if (and (not (= 0 i)) (= (+ elmt 1) i))
         (progn
           (let ((loc (position i neighbors)))
+            (if (null loc)
+              (return-from check-board nil))
             (if (= loc 0)
               (return-from check-board
                 (check-board board (list (- row 1) col))))
@@ -283,7 +289,7 @@
     (if (zerop (mod i (array-dimension board 0)))
       (progn
         (terpri)
-            (if (< 10 (- (array-dimension board 0) (/ i (array-dimension board 0))))
+            (if (<= 10 (- (array-dimension board 0) (/ i (array-dimension board 0))))
               (princ "[")
             (princ "[ "))
         (princ
@@ -301,9 +307,9 @@
               (princ #\Space)
               (princ #\Space))
             (progn
-              (if (< 10 elmt)
+              (if (<= 10 elmt)
                 (progn
-                  (if (< 100 elmt)
+                  (if (<= 100 elmt)
                     (progn
                     (princ elmt)
                     (princ #\Space))
@@ -322,7 +328,7 @@
   (princ #\Space)
   (princ #\Space)
   (loop for i below (array-dimension board 0) do
-    (if (< 1 (/ i 10))
+    (if (<= 1 (/ (+ i 1) 10))
       (princ "[ ")
     (princ "[  "))
     (princ (concatenate 'string
