@@ -124,8 +124,7 @@ Please enter in the file you would like to load")))
 (defun depth-first (board element_location direction)
   (if (typep board 'integer)
     (return-from depth-first -1))
-(princ "element location")
-(print element_location)
+
   (let ((elmt (aref board (car element_location) (cadr element_location)))
         (row (car element_location))
         (col (cadr element_location)))
@@ -179,12 +178,12 @@ Please enter in the file you would like to load")))
           (progn
             (setf board (car (insert-into-board
                                (list (- row 1) col next) board)))
-             (print-board board)
+             (setf moves (append moves (list (-row 1) col next)))
              (setf move_on (depth-first board (list (- row 1) col) direction))
              (if (typep move_on 'integer)
                (progn
                  (insert-into-board (list (- row 1) col nil) board)
-                 (print-board board))
+                 (setf moves (reverse (cdr (reverse moves)))))
              (return-from depth-first board))))
          (if (and (null left)
                  (<= (+ (abs (- ideal_row row)) (abs (- ideal_col (- col 1))))
@@ -192,12 +191,12 @@ Please enter in the file you would like to load")))
            (progn
              (setf board (car (insert-into-board
                                 (list row (- col 1) next) board)))
-             (print-board board)
+             (setf moves (append moves (list row (- col 1) next)))
              (setf move_on (depth-first board (list row (- col 1)) direction))
              (if (typep move_on 'integer)
                (progn
                  (insert-into-board (list row (- col 1) nil) board)
-               (print-board board))
+               (setf moves (reverse (cdr (reverse moves)))))
              (return-from depth-first board))))
          (if (and (null down)
                  (<= (+ (abs (- ideal_row (+ row 1))) (abs (- ideal_col col)))
@@ -205,12 +204,12 @@ Please enter in the file you would like to load")))
            (progn
              (setf board (car (insert-into-board
                                 (list (+ row 1) col next) board)))
-             (print-board board)
+             (setf moves (append moves (list (+ row 1) col next)))
              (setf move_on (depth-first board (list (+ row 1) col ) direction))
              (if (typep move_on 'integer)
                (progn
                  (insert-into-board (list (+ row 1) col nil) board)
-                 (print-board board))
+                 (setf moves (reverse (cdr (reverse moves)))))
              (return-from depth-first board))))
          (if (and (null right)
                  (<= (+ (abs (- ideal_row row)) (abs (- ideal_col (+ col 1))))
@@ -218,15 +217,14 @@ Please enter in the file you would like to load")))
            (progn
              (setf board (car (insert-into-board
                                 (list row (+ col 1) next) board)))
-             (print-board board)
+             (setf moves (append moves (list row (+ col 1) next)))
              (setf move_on (depth-first board (list row (+ col 1)) direction))
              (if (typep move_on 'integer)
                (progn
                  (insert-into-board (list row (+ col 1) nil) board)
-                 (print-board board))
+                (setf moves (reverse (cdr (reverse moves)))))
              (return-from depth-first board))))
          (return-from depth-first -1)))))
-
 
 (defun solve-smarter (board)
   (return-from solve-smarter (insert-known-elements board)))
@@ -240,7 +238,7 @@ Please enter in the file you would like to load")))
       (progn
         (print "There was a problem reading the file. Please try again.")
         (return-from solve-game nil)))
-
+    (setf moves nil)
     (setf board (car info))
     (setf elements_left (cadr info))
     (setf min_elmt (caddr info))
