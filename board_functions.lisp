@@ -116,7 +116,7 @@
         (return-from insert-element-into-board (list board is_null_value elmt))
       (return-from insert-element-into-board (list board is_null_value min_elmt))))))))
 
-(defun insert-known-elements (board)
+(defun insert-known-elements (board moves)
   (loop for i below (array-total-size board) do
     (let ((elmt (row-major-aref board i)))
       (if (not (null elmt))
@@ -167,41 +167,41 @@
         (if (null up)
           (progn
             (setf board (car (insert-into-board (list (- row 1) col (- elmt 1)) board)))
-            (print-board board)))
+            (setf moves (append moves (list (list (- row 1) col (- elmt 1)))))))
         (if (null left)
           (progn
             (setf board (car (insert-into-board (list row (- col 1) (- elmt 1)) board)))
-            (print-board board)))
+            (setf moves (append moves (list (list row (- col 1) (- elmt 1)))))))
         (if (null down)
           (progn
             (setf board (car (insert-into-board (list (+ row 1) col (- elmt 1)) board)))
-            (print-board board)))
+            (setf moves (append moves (list (list (+ row 1) col (- elmt 1)))))))
         (if (null right)
           (progn
             (setf board (car (insert-into-board (list row (+ col 1) (- elmt 1)) board)))
-            (print-board board)))))
+            (setf moves (append moves (list (list row (+ col 1) (- elmt 1)))))))))
       (if (and (= 3 count_neighbors) less
                (not (= elmt (expt (array-dimension board 0) 2))))
         (progn
         (if (null up)
           (progn
             (setf board (car (insert-into-board (list (- row 1) col (+ elmt 1)) board)))
-            (print-board board)))
+            (setf moves (append moves (list (list (- row 1) col (+ elmt 1)))))))
         (if (null left)
           (progn
             (setf board (car (insert-into-board (list row (- col 1) (+ elmt 1)) board)))
-            (print-board board)))
+            (setf moves (append moves (list (list row (- col 1) (+ elmt 1)))))))
         (if (null down)
           (progn
             (setf board (car (insert-into-board (list (+ row 1) col (+ elmt 1)) board)))
-            (print-board board)))
+            (setf moves (append moves (list (list (+ row 1) col (+ elmt 1)))))))
         (if (null right)
           (progn
             (setf board (car (insert-into-board (list row (+ col 1) (+ elmt 1)) board)))
-            (print-board board)))))
+            (setf moves (append moves (list (list row (+ col 1) (+ elmt 1)))))))))
 
         )))))))))
-  (return-from insert-known-elements board))
+  (return-from insert-known-elements (list board moves)))
 
 (defun get-element (board location)
   (let ((row (car location))
@@ -211,7 +211,7 @@
              (<= row dim) (<= col dim))
       (return-from get-element (aref board row col)))))
 
-(defun check-ahead (board)
+(defun check-ahead (board moves)
   (loop for i below (array-total-size board) do
     (let ((elmt (row-major-aref board i)))
       (if (not (null elmt))
@@ -237,51 +237,46 @@
                                            (list next_prev two_behind)) do
                 (let ((next (car next_pair))
                       (ahead (cadr next_pair)))
-                  (print "this element")
-                  (print (get-element board location))
               (if (and (not (is-elmt-in board next)) (is-elmt-in board ahead))
                 (progn
                   (setf possibilities 0)
                   (loop for n in (list up left down right) do
                     (if (null (get-element board n))
                       (progn
-                        (print n)
                         (if (not (null (member ahead
                                                (grab-neighbors board n))))
                           (setf possibilities (+ possibilities 1))))))
-                  (print possibilities)
                   (if (= possibilities 1)
                     (progn
-                      (print "possibilities should be one")
                   (if (and (null (get-element board up))
                         (not (null (member ahead
                                          (grab-neighbors board up)))))
                     (progn
                       (setf board (car (insert-into-board
                                          (append up (list next)) board)))
-                      (print-board board)))
+                      (setf moves (append moves (list (append up (list next)))))))
                   (if (and (null (get-element board left))
                            (not (null (member ahead
                                          (grab-neighbors board left)))))
                     (progn
                       (setf board (car (insert-into-board
                                          (append left (list next)) board)))
-                      (print-board board)))
+                      (setf moves (append moves (list (append left (list next)))))))
                   (if (and (null (get-element board down))
                            (not (null (member ahead
                                          (grab-neighbors board down)))))
                     (progn
                       (setf board (car (insert-into-board
                                          (append down (list next)) board)))
-                      (print-board board)))
+                      (setf moves (append moves (list (append down (list next)))))))
                   (if (and (null (get-element board right))
                            (not (null (member ahead
                                          (grab-neighbors board right)))))
                     (progn
                       (setf board (car (insert-into-board
                                          (append right (list next)) board)))
-                      (print-board board)))))))))))))))))
-              (return-from check-ahead board))
+                      (setf moves (append moves (list (append right (list next)))))))))))))))))))))
+            (return-from check-ahead (list board moves)))
 
 
 (defun print-board (board)
